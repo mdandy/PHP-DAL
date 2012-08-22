@@ -1,0 +1,50 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>PHP DAL</title>
+	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+</head>
+
+<body>
+	<form onsubmit="return false">
+		<button type="button" onclick="execute()">Execute!</button>
+	</form>
+	<div id="status"></div>
+	
+	<script type="text/javascript">
+		function execute()
+		{
+			$.ajaxSetup (
+			{
+				cache: false
+			});
+			
+			var ajax_load = "<p>Running test cases...</p>";
+			var loadUrl = "test.php";
+			var query = { module: "all" };
+			$("#status").html(ajax_load);
+			
+			$.ajax ({
+				type: "POST",
+				url: loadUrl,
+				data: query,
+				dataType: "html",
+				timeout: 10000, //10 seconds
+				success: function(data) 
+				{
+					$("#status").html(data);
+				},
+				error: function(jqXHR, textStatus, errorThrown) 
+				{
+					var error = jqXHR.status + " : " + jqXHR.statusText;
+					var status = "<p style='color:red'>" + error + "</p>";
+					$("#status").html(status);
+				}
+			});
+		}
+	</script>
+</body>
+
+</html>
