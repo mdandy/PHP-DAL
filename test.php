@@ -70,6 +70,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 			$output .= endTestCase();	
 		}
 		
+		if (strcmp($module, "all") == 0 || strcmp($module, "get_table_version") == 0)
+		{
+			$output .= printTestSuite("Get table version");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test1");
+			$table->addColumnDefinition("column1", "varchar", 255);
+			$table->addColumnDefinition("column2", "varchar", 255);
+			$table->addColumnDefinition("column3", "int");
+			$table->addPrimaryKeyDefinition("column1");
+			$table->addPrimaryKeyDefinition("column2");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$version = DAL::getTableVersion("test1");
+			$output .= printTestCase("getTableVersion test1", $version);
+			
+			$version = DAL::getTableVersion("testtest");
+			$output .= printTestCase("getTableVersion testtest", $version);
+			
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "table_exist") == 0)
+		{
+			$output .= printTestSuite("Check table exist");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test1");
+			$table->addColumnDefinition("column1", "varchar", 255);
+			$table->addColumnDefinition("column2", "varchar", 255);
+			$table->addColumnDefinition("column3", "int");
+			$table->addPrimaryKeyDefinition("column1");
+			$table->addPrimaryKeyDefinition("column2");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$ret = DAL::isTableExist("test1");
+			$output .= printTestCase("isTableExist test1", niceBoolean($ret));
+			
+			$ret = DAL::isTableExist("testtest");
+			$output .= printTestCase("isTableExist testtest", niceBoolean($ret));
+			
+			$output .= endTestCase();	
+		}
+		
 		DAL::disconnect();
 		echo $output;
 	}

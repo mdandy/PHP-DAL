@@ -235,7 +235,7 @@ class DAL
 					$datatype = self::parseDatatype2($datatype_def);
 					$size = self::parseSize($datatype_def);
 					$iskey = $result["iskey"];
-					$version = intval($result["version"]);
+					$version = $result["version"];
 					
 					$table->addColumnDefinition($column_name, $datatype, $size);
 					if ($iskey == 1)
@@ -250,6 +250,46 @@ class DAL
 			//echo ("Error: " . $e->getMessage());
 		}
 		return NULL;
+	}
+	
+	/**
+	 * Get the table version.
+	 * @return The table version or -1 if the table does not exist
+	 */
+	public function getTableVersion($tableName)
+	{
+		try
+		{
+			$schema_table_name = self::$schema_table;
+			$sql = "SELECT version FROM $schema_table_name WHERE table_name=:table_name LIMIT 1";
+			$query = self::$dbh->prepare($sql);
+			$query->bindParam(":table_name", $tableName, PDO::PARAM_STR, 255);
+			$query->execute();
+			
+			if ($query->rowCount() > 0)
+			{
+				$version = $query->fetch();
+				return $version["version"];
+			}
+			return -1;
+		}
+		catch(PDOException $e) 
+		{
+			//echo ("Error: " . $e->getMessage());
+		}
+		return -1;
+	}
+	
+	/**
+	 * Check if a table exist in the database.
+	 * @return true if the table exists or false othewise
+	 */
+	public function isTableExist($tableName)
+	{
+		$version = self::getTableVersion($tableName);
+		if ($version == -1)
+			return false;
+		return true;
 	}
 	
 	public function insert()
