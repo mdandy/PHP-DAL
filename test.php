@@ -96,7 +96,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 		
 		if (strcmp($module, "all") == 0 || strcmp($module, "table_exist") == 0)
 		{
-			$output .= printTestSuite("Check table exist");
+			$output .= printTestSuite("Check table exists");
 			$output .= beginTestCase();
 			
 			$table = new TableSchema("test1");

@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * This class represents a table schema.
+ * @author Michael Dandy
+ */
 class TableSchema
 {
 	public $table_name = "";
@@ -40,6 +44,30 @@ class TableSchema
 	public function addPrimaryKeyDefinition($column_name)
 	{
 		array_push($this->primary_def, $column_name);
+	}
+	
+	/**
+	 * Get the column names of this table.
+	 * @return Array of column names of this table
+	 */
+	public function getColumnNames()
+	{
+		$columns = array();
+		for($i = 0; $i < count($this->column_def); $i++)
+		{
+			$def = explode(" ", $this->column_def[$i]);
+			array_push($columns, $def[0]);
+		}
+		return $columns;
+	}
+	
+	/**
+	 * Get the primary keys of this table.
+	 * @return The primary keys of this table
+	 */
+	public function getPrimaryKeys()
+	{
+		return $this->primary_def;
 	}
 }
 

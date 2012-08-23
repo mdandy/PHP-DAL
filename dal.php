@@ -5,6 +5,7 @@ require_once("dbconfig.php");
 /**
  * This class provides a Data Access Layer services to the Database using PDO
  * library.
+ * @author Michael Dandy
  * @see http://php.net/manual/en/book.pdo.php
  */
 class DAL
@@ -81,6 +82,7 @@ class DAL
 	
 	/**
 	 * Add table definition to schema table.
+	 * @param TableSchema $table The table to be added to the schema
 	 * @return true on success or false otherwise
 	 */
 	private static function addToSchema($table)
@@ -127,6 +129,7 @@ class DAL
 	
 	/**
 	 * Parse column name from the column defition.
+	 * @param string $column_def The column definition
 	 * @return The column name
 	 */
 	private static function parseColumnName($column_def)
@@ -137,6 +140,7 @@ class DAL
 	
 	/**
 	 * Parse column datatype with the size from the column defition.
+	 * @param string $column_def The column definition
 	 * @return The column datatype
 	 */
 	private static function parseDatatype($column_def)
@@ -147,6 +151,7 @@ class DAL
 	
 	/**
 	 * Parse column datatype without the size from the datatype defition.
+	 * @param string $datatype_def The column datatype definition
 	 * @return The column datatype
 	 */
 	private static function parseDatatype2($datatype_def)
@@ -157,6 +162,7 @@ class DAL
 	
 	/**
 	 * Parse column size from the datatype defition.
+	 * @param string $datatype_def The column datatype definition
 	 * @return The column size
 	 */
 	private static function parseSize($datatype_def)
@@ -167,7 +173,7 @@ class DAL
 	}
 	
 	/**
-	 * Create a table and add it to the schema table
+	 * Create a table and add it to the schema table.
 	 * @param TableSchema $table The table schema to be created
 	 * @return true on sucess or false otherwise
 	 */
@@ -213,7 +219,8 @@ class DAL
 	
 	/**
 	 * Get the table schema.
-	 * @return The table schema object
+	 * @param string $tableName The name of the table
+	 * @return The TableSchema object
 	 */
 	public function getTableSchema($tableName)
 	{
@@ -254,6 +261,7 @@ class DAL
 	
 	/**
 	 * Get the table version.
+	 * @param string $tableName The name of the table
 	 * @return The table version or -1 if the table does not exist
 	 */
 	public function getTableVersion($tableName)
@@ -282,6 +290,7 @@ class DAL
 	
 	/**
 	 * Check if a table exist in the database.
+	 * @param string $tableName The name of the table
 	 * @return true if the table exists or false othewise
 	 */
 	public function isTableExist($tableName)
