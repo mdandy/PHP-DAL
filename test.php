@@ -18,9 +18,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 		$output .= printTestCase("isConnected", niceBoolean(DAL::isConnected()));
 		$output .= endTestCase();	
 		
-		if (strcmp($module, "all") == 0 || strcmp($module, "create table") == 0)
+		if (strcmp($module, "all") == 0 || strcmp($module, "create_table") == 0)
 		{
-			$output .= printTestSuite("Create table test1");
+			$output .= printTestSuite("Create table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test1");
+			$table->addColumnDefinition("column1", "varchar", 255);
+			$table->addColumnDefinition("column2", "varchar", 255);
+			$table->addColumnDefinition("column3", "int");
+			$table->addPrimaryKeyDefinition("column1");
+			$table->addPrimaryKeyDefinition("column2");
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable test1", OKify($ret));
+			
+			$table = new TableSchema("test2");
+			$table->addColumnDefinition("column1", "varchar", 50);
+			$table->addColumnDefinition("column2", "varchar", 100);
+			$table->addColumnDefinition("column3", "int");
+			$table->addPrimaryKeyDefinition("column1");
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable test2", OKify($ret));
+			
+			$table = new TableSchema("test3");
+			$table->addColumnDefinition("column1", "varchar", 123);
+			$table->addColumnDefinition("column2", "varchar", 234);
+			$table->addColumnDefinition("column3", "int");
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable test3", OKify($ret));
+			
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "get_table") == 0)
+		{
+			$output .= printTestSuite("Get table test1");
 			$output .= beginTestCase();
 			
 			$table = new TableSchema("test1");
@@ -32,20 +64,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 			$ret = DAL::createTable($table);
 			$output .= printTestCase("createTable", OKify($ret));
 			
-			$table = new TableSchema("test2");
-			$table->addColumnDefinition("column1", "varchar", 50);
-			$table->addColumnDefinition("column2", "varchar", 100);
-			$table->addColumnDefinition("column3", "int");
-			$table->addPrimaryKeyDefinition("column1");
-			$ret = DAL::createTable($table);
-			$output .= printTestCase("createTable", OKify($ret));
-			
-			$table = new TableSchema("test3");
-			$table->addColumnDefinition("column1", "varchar", 123);
-			$table->addColumnDefinition("column2", "varchar", 234);
-			$table->addColumnDefinition("column3", "int");
-			$ret = DAL::createTable($table);
-			$output .= printTestCase("createTable", OKify($ret));
+			$table2 = DAL::getTableSchema("test1");
+			$output .= print_r($table2, true);
 			
 			$output .= endTestCase();	
 		}

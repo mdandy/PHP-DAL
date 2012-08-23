@@ -120,7 +120,7 @@ class DAL
 		}
 		catch(PDOException $e) 
 		{
-			echo ("Error: " . $e->getMessage());
+			//echo ("Error: " . $e->getMessage());
 			return false;
 		}
 	}
@@ -136,7 +136,7 @@ class DAL
 	}
 	
 	/**
-	 * Parse column datatype from the column defition.
+	 * Parse column datatype with the size from the column defition.
 	 * @return The column datatype
 	 */
 	private static function parseDatatype($column_def)
@@ -146,14 +146,35 @@ class DAL
 	}
 	
 	/**
+	 * Parse column datatype without the size from the datatype defition.
+	 * @return The column datatype
+	 */
+	private static function parseDatatype2($datatype_def)
+	{
+		$def = explode("(", $datatype_def);
+		return $def[0];
+	}
+	
+	/**
+	 * Parse column size from the datatype defition.
+	 * @return The column size
+	 */
+	private static function parseSize($datatype_def)
+	{
+		$def = explode("(", $datatype_def);
+		$size = substr($def[1], 0, -1);
+		return intval($size);
+	}
+	
+	/**
 	 * Create a table and add it to the schema table
 	 * @param TableSchema $table The table schema to be created
 	 * @return true on sucess or false otherwise
 	 */
 	public static function createTable($table)
 	{
-		$isSuccessful = self::addToSchema($table);
-		if ($isSuccessful)
+		
+		try
 		{
 			$table_name = $table->table_name;
 			$sql = "CREATE TABLE IF NOT EXISTS $table_name (";
@@ -178,9 +199,72 @@ class DAL
 			}
 			$sql .= ")";
 			self::$dbh->exec($sql);
+			
+			// Add the table to schema
+			$isSuccessful = self::addToSchema($table);
+			return $isSuccessful;
 		}
+		catch(PDOException $e) 
+		{
+			//echo ("Error: " . $e->getMessage());
+		}
+		return false;
+	}
+	
+	/**
+	 * Get the table schema.
+	 * @return The table schema object
+	 */
+	public function getTableSchema($tableName)
+	{
+		try
+		{
+			$schema_table_name = self::$schema_table;
+			$sql = "SELECT * FROM $schema_table_name WHERE table_name=:table_name";
+			$query = self::$dbh->prepare($sql);
+			$query->bindParam(":table_name", $tableName, PDO::PARAM_STR, 255);
+			$query->execute();
+
+			if ($query->rowCount() > 0)
+			{
+				$table = new TableSchema($tableName);
+				while ($result = $query->fetch())
+				{
+					$column_name = $result["column_name"];
+					$datatype_def = $result["datatype"];
+					$datatype = self::parseDatatype2($datatype_def);
+					$size = self::parseSize($datatype_def);
+					$iskey = $result["iskey"];
+					$version = intval($result["version"]);
+					
+					$table->addColumnDefinition($column_name, $datatype, $size);
+					if ($iskey == 1)
+						$table->addPrimaryKeyDefinition($column_name);
+					$table->version = $version;
+				}
+				return $table;
+			}
+		}
+		catch(PDOException $e) 
+		{
+			//echo ("Error: " . $e->getMessage());
+		}
+		return NULL;
+	}
+	
+	public function insert()
+	{
 		
-		return $isSuccessful;
+	}
+	
+	public function update()
+	{
+		
+	}
+	
+	public function delete()
+	{
+		
 	}
 }
 
