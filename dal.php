@@ -389,7 +389,6 @@ class DAL
 			$sql .= ") VALUES (";
 			for ($i = 0; $i < count($columns); $i++)
 			{
-				//$sql .= ":data" . $i;
 				$sql .= "?";
 				if ($i != count($columns) - 1)
 					$sql .= ", ";
@@ -407,19 +406,144 @@ class DAL
 		return false;
 	}
 	
-	public function select($columns = NULL)
+	/**
+	 * Retrieve data from the table.
+	 * @param string $tableName The name of the table
+	 * @param string[] $columns [Optional] The name of the columns to be retrieved. It will return all columns if it is not specified.
+	 * @param string[] $where_columns [Optional] The name of the columns to be used in the WHERE clause
+	 * @param string[] $where_args [Optional] The arguments of the WHERE clause
+	 * @return An array of data from the table.
+	 */
+	public function select($tableName, $columns = NULL, $where_columns = NULL, $where_args = NULL)
 	{
-		
+		try
+		{
+			$sql = "SELECT ";
+			if ($columns == NULL)
+			{	
+				$sql .= "*";
+			}
+			else
+			{
+				for ($i = 0; $i < count($columns); $i++)
+				{
+					$sql .= $columns[$i];
+					if ($i != count($columns) - 1)
+						$sql .= ", ";
+				}
+			}
+			$sql .= " FROM $tableName";
+			
+			if ($where_columns != NULL && $where_args != NULL)
+			{
+				$sql .= " WHERE ";
+				for ($i = 0; $i < count($where_columns); $i++)
+				{
+					$sql .= $where_columns[$i];
+					$sql .= "=?";
+					if ($i != count($where_columns) - 1)
+						$sql .= " AND ";
+				}
+			}
+			
+			$query = self::$dbh->prepare($sql);
+			$query->bindParam(":table_name", $tableName, PDO::PARAM_STR, 255);
+			$query->execute($where_args);
+			return $query->fetchAll(PDO::FETCH_ASSOC);
+		}
+		catch(PDOException $e) 
+		{
+			echo ("Error: " . $e->getMessage());
+		}
+		return array();
 	}
 	
-	public function update()
+	/**
+	 * Update an existing data in a table.
+	 * @param string $tableName The name of the table
+	 * @param string[] $columns The name of the columns where the data will be inserted
+	 * @param string[] $data The data to be inserted
+	 * @param string[] $where_columns The name of the columns to be used in the WHERE clause
+	 * @param string[] $where_args The arguments of the WHERE clause
+	 * @return true on success or false otherwise
+	 */
+	public function update($tableName, $columns, $data, $where_columns, $where_args)
 	{
-		
+		try
+		{
+			// Building the SQL statement
+			$sql = "UPDATE $tableName SET ";
+			for ($i = 0; $i < count($columns); $i++)
+			{
+				$sql .= $columns[$i];
+				$sql .= "=?";
+				if ($i != count($columns) - 1)
+					$sql .= ", ";
+			}
+			$sql .= " WHERE ";
+			for ($i = 0; $i < count($where_columns); $i++)
+			{
+				$sql .= $where_columns[$i];
+				$sql .= "=?";
+				if ($i != count($where_columns) - 1)
+					$sql .= " AND ";
+			}
+
+			echo ("$sql <br/>");
+
+			$query = self::$dbh->prepare($sql);
+			return $query->execute(array_merge($data, $where_args));
+		}
+		catch(PDOException $e) 
+		{
+			echo ("Error: " . $e->getMessage());
+		}
+		return false;
 	}
 	
-	public function upsert()
+	/**
+	 * Insert data to a table. If the data already exists, it will do update instead.
+	 * @param string $tableName The name of the table
+	 * @param string[] $columns The name of the columns where the data will be inserted
+	 * @param string[] $data The data to be inserted
+	 * @return true on success or false otherwise
+	 */
+	public function upsert($tableName, $columns, $data)
 	{
-		
+		try
+		{
+			// Building the SQL statement
+			$sql = "INSERT INTO $tableName (";
+			for ($i = 0; $i < count($columns); $i++)
+			{
+				$sql .= $columns[$i];
+				if ($i != count($columns) - 1)
+					$sql .= ", ";
+			}
+			$sql .= ") VALUES (";
+			for ($i = 0; $i < count($columns); $i++)
+			{
+				$sql .= "?";
+				if ($i != count($columns) - 1)
+					$sql .= ", ";
+			}			
+			$sql .= ") ON DUPLICATE KEY UPDATE ";
+			for ($i = 0; $i < count($columns); $i++)
+			{
+				$sql .= $columns[$i] . "=?";
+				if ($i != count($columns) - 1)
+					$sql .= ", ";
+			}
+
+			$query = self::$dbh->prepare($sql);
+			$isSuccessful = $query->execute(array_merge($data, $data));
+			return $isSuccessful;
+		}
+		catch(PDOException $e) 
+		{
+			echo ("Error: " . $e->getMessage());
+		}
+		return false;
 	}
 	
 	public function delete()

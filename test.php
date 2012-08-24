@@ -174,7 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 		
 		if (strcmp($module, "all") == 0 || strcmp($module, "insert") == 0)
 		{
-			$output .= printTestSuite("Drop table");
+			$output .= printTestSuite("Insert into table");
 			$output .= beginTestCase();
 			
 			$table = new TableSchema("test4");
@@ -190,6 +190,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 			$output .= print_r($columns, true);
 			$output .= "<br/>";
 			
+			$ret = DAL::emptyTable("test4");
+			$output .= printTestCase("emptyTable", OKify($ret));
+			
 			$ret = DAL::insert("test4", $columns, array("boo", "yeah", 1));
 			$output .= printTestCase("insert", OKify($ret));
 
@@ -199,6 +202,126 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 			$ret = DAL::insert("test4", $columns, array("georgia", "tech", 567));
 			$output .= printTestCase("insert", OKify($ret));
 
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "upsert") == 0)
+		{
+			$output .= printTestSuite("Upsert table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test4");
+			$table->addColumnDefinition("aaa", "varchar", 255);
+			$table->addColumnDefinition("bbb", "varchar", 255);
+			$table->addColumnDefinition("ccc", "int");
+			$table->addPrimaryKeyDefinition("aaa");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$columns = $table->getColumnNames();
+			$output .= print_r($columns, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::emptyTable("test4");
+			$output .= printTestCase("emptyTable", OKify($ret));
+			
+			$ret = DAL::upsert("test4", $columns, array("boo", "yeah", 1));
+			$output .= printTestCase("upsert", OKify($ret));
+
+			$ret = DAL::upsert("test4", $columns, array("boo", "yeah", 1));
+			$output .= printTestCase("upsert", OKify($ret));
+			
+			$ret = DAL::upsert("test4", $columns, array("boo", "booyeah", 123));
+			$output .= printTestCase("upsert", OKify($ret));
+
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "select") == 0)
+		{
+			$output .= printTestSuite("Select table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test4");
+			$table->addColumnDefinition("aaa", "varchar", 255);
+			$table->addColumnDefinition("bbb", "varchar", 255);
+			$table->addColumnDefinition("ccc", "int");
+			$table->addPrimaryKeyDefinition("aaa");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$columns = $table->getColumnNames();
+			$output .= print_r($columns, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::emptyTable("test4");
+			$output .= printTestCase("emptyTable", OKify($ret));
+			
+			$ret = DAL::upsert("test4", $columns, array("boo", "yeah", 1));
+			$output .= printTestCase("upsert", OKify($ret));
+
+			$ret = DAL::upsert("test4", $columns, array("hello", "world", 123));
+			$output .= printTestCase("upsert", OKify($ret));
+			
+			$ret = DAL::upsert("test4", $columns, array("georgia", "tech", 567));
+			$output .= printTestCase("upsert", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$data = DAL::select("test4", array("aaa", "ccc"));
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$data = DAL::select("test4", array("aaa", "bbb", "ccc"), array("aaa"), array("boo"));
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+
+			$data = DAL::select("test4", array("aaa", "ccc"), array("aaa", "ccc"), array("georgia", 567));
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "update") == 0)
+		{
+			$output .= printTestSuite("Update table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test4");
+			$table->addColumnDefinition("aaa", "varchar", 255);
+			$table->addColumnDefinition("bbb", "varchar", 255);
+			$table->addColumnDefinition("ccc", "int");
+			$table->addPrimaryKeyDefinition("aaa");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$columns = $table->getColumnNames();
+			$output .= print_r($columns, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::emptyTable("test4");
+			$output .= printTestCase("emptyTable", OKify($ret));
+			
+			$ret = DAL::insert("test4", $columns, array("boo", "yeah", 1));
+			$output .= printTestCase("insert", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::update("test4", $columns, array("georgia", "tech", 123), array("aaa"), array("boo"));
+			$output .= printTestCase("update", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
 			$output .= endTestCase();	
 		}
 		
