@@ -123,8 +123,32 @@ class DAL
 		catch(PDOException $e) 
 		{
 			//echo ("Error: " . $e->getMessage());
-			return false;
 		}
+		
+		return false;
+	}
+	
+	/**
+	 * Remove table definition to schema table.
+	 * @param string $tableName The table name
+	 * @return true on success or false otherwise
+	 */
+	private static function deleteFromSchema($tableName)
+	{
+		try
+		{
+			$schema_table_name = self::$schema_table;
+			$sql = "DELETE FROM $schema_table_name WHERE table_name=:table_name";
+			$query = self::$dbh->prepare($sql);
+			$query->bindParam(":table_name", $tableName, PDO::PARAM_STR, 255);
+			$query->execute();
+			return true;
+		}
+		catch(PDOException $e) 
+		{
+			//echo ("Error: " . $e->getMessage());
+		}
+		return false;
 	}
 	
 	/**
@@ -179,6 +203,7 @@ class DAL
 	 */
 	public static function createTable($table)
 	{
+		// TODO: check for upgrade
 		
 		try
 		{
@@ -301,12 +326,98 @@ class DAL
 		return true;
 	}
 	
-	public function insert()
+	/**
+	 * Delete a table.
+	 * @param string $tableName The table name
+	 * @return true on sucess or false otherwise
+	 */
+	public function dropTable($tableName)
+	{
+		try
+		{
+			$sql = "DROP TABLE $tableName";
+			self::$dbh->exec($sql);
+			return self::deleteFromSchema($tableName);
+		}
+		catch(PDOException $e) 
+		{
+			//echo ("Error: " . $e->getMessage());
+		}
+		return false;
+	}
+	
+	/**
+	 * Empty a table.
+	 * @param string $tableName The table name
+	 * @return true on sucess or false otherwise
+	 */
+	public function emptyTable($tableName)
+	{
+		try
+		{
+			$sql = "TRUNCATE TABLE $tableName";
+			self::$dbh->exec($sql);
+			return true;
+		}
+		catch(PDOException $e) 
+		{
+			echo ("Error: " . $e->getMessage());
+		}
+		return false;
+	}
+	
+	/**
+	 * Insert data to a table. Note: This will fail if the data violates the primary key 
+	 * constraint.
+	 * @param string $tableName The name of the table
+	 * @param string[] $columns The name of the columns where the data will be inserted
+	 * @param string[] $data The data to be inserted
+	 * @return true on success or false otherwise
+	 */
+	public function insert($tableName, $columns, $data)
+	{
+		try
+		{
+			// Building the SQL statement
+			$sql = "INSERT INTO $tableName (";
+			for ($i = 0; $i < count($columns); $i++)
+			{
+				$sql .= $columns[$i];
+				if ($i != count($columns) - 1)
+					$sql .= ", ";
+			}
+			$sql .= ") VALUES (";
+			for ($i = 0; $i < count($columns); $i++)
+			{
+				//$sql .= ":data" . $i;
+				$sql .= "?";
+				if ($i != count($columns) - 1)
+					$sql .= ", ";
+			}			
+			$sql .= ")";
+
+			$query = self::$dbh->prepare($sql);
+			$isSuccessful = $query->execute($data);
+			return $isSuccessful;
+		}
+		catch(PDOException $e) 
+		{
+			echo ("Error: " . $e->getMessage());
+		}
+		return false;
+	}
+	
+	public function select($columns = NULL)
 	{
 		
 	}
 	
 	public function update()
+	{
+		
+	}
+	
+	public function upsert()
 	{
 		
 	}

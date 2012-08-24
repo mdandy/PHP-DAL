@@ -118,6 +118,90 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 			$output .= endTestCase();	
 		}
 		
+		if (strcmp($module, "all") == 0 || strcmp($module, "truncate_table") == 0)
+		{
+			$output .= printTestSuite("Truncate table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test1");
+			$table->addColumnDefinition("column1", "varchar", 255);
+			$table->addColumnDefinition("column2", "varchar", 255);
+			$table->addColumnDefinition("column3", "int");
+			$table->addPrimaryKeyDefinition("column1");
+			$table->addPrimaryKeyDefinition("column2");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$ret = DAL::isTableExist("test1");
+			$output .= printTestCase("isTableExist test1", niceBoolean($ret));
+			
+			$ret = DAL::emptyTable("test1");
+			$output .= printTestCase("emptyTable", OKify($ret));
+			
+			$ret = DAL::isTableExist("test1");
+			$output .= printTestCase("isTableExist test1", niceBoolean($ret));
+			
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "drop_table") == 0)
+		{
+			$output .= printTestSuite("Drop table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test1");
+			$table->addColumnDefinition("column1", "varchar", 255);
+			$table->addColumnDefinition("column2", "varchar", 255);
+			$table->addColumnDefinition("column3", "int");
+			$table->addPrimaryKeyDefinition("column1");
+			$table->addPrimaryKeyDefinition("column2");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$ret = DAL::isTableExist("test1");
+			$output .= printTestCase("isTableExist test1", niceBoolean($ret));
+			
+			$ret = DAL::dropTable("test1");
+			$output .= printTestCase("dropTable", OKify($ret));
+			
+			$ret = DAL::isTableExist("test1");
+			$output .= printTestCase("isTableExist test1", niceBoolean($ret));
+			
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "insert") == 0)
+		{
+			$output .= printTestSuite("Drop table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test4");
+			$table->addColumnDefinition("aaa", "varchar", 255);
+			$table->addColumnDefinition("bbb", "varchar", 255);
+			$table->addColumnDefinition("ccc", "int");
+			$table->addPrimaryKeyDefinition("aaa");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$columns = $table->getColumnNames();
+			$output .= print_r($columns, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::insert("test4", $columns, array("boo", "yeah", 1));
+			$output .= printTestCase("insert", OKify($ret));
+
+			$ret = DAL::insert("test4", $columns, array("hello", "world", 123));
+			$output .= printTestCase("insert", OKify($ret));
+			
+			$ret = DAL::insert("test4", $columns, array("georgia", "tech", 567));
+			$output .= printTestCase("insert", OKify($ret));
+
+			$output .= endTestCase();	
+		}
+		
 		DAL::disconnect();
 		echo $output;
 	}

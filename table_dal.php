@@ -14,6 +14,7 @@ class TableSchema
 	/**
 	 * Constructor
 	 * @param string $table_name The name of the table
+	 * @param int $version [Optional] The version of the table. It is defaulted to 0.
 	 */
 	public function __construct($table_name, $version = 0) 
 	{
