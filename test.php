@@ -322,6 +322,75 @@ if ($_SERVER["REQUEST_METHOD"] == "POST")
 			$output .= print_r($data, true);
 			$output .= "<br/>";
 			
+			$ret = DAL::update("test4", $columns, array("hello", "world", 789), array("aaa","bbb"), array("georgia", "tech"));
+			$output .= printTestCase("update", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::update("test4", $columns, array("georgia", "tech", 123), array("aaa"), array("booyeah"));
+			$output .= printTestCase("update", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$output .= endTestCase();	
+		}
+		
+		if (strcmp($module, "all") == 0 || strcmp($module, "delete") == 0)
+		{
+			$output .= printTestSuite("Delete from table");
+			$output .= beginTestCase();
+			
+			$table = new TableSchema("test4");
+			$table->addColumnDefinition("aaa", "varchar", 255);
+			$table->addColumnDefinition("bbb", "varchar", 255);
+			$table->addColumnDefinition("ccc", "int");
+			$table->addPrimaryKeyDefinition("aaa");
+			$table->version = 2;
+			$ret = DAL::createTable($table);
+			$output .= printTestCase("createTable", OKify($ret));
+			
+			$columns = $table->getColumnNames();
+			$output .= print_r($columns, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::emptyTable("test4");
+			$output .= printTestCase("emptyTable", OKify($ret));
+			
+			$ret = DAL::insert("test4", $columns, array("boo", "yeah", 1));
+			$output .= printTestCase("insert", OKify($ret));
+
+			$ret = DAL::insert("test4", $columns, array("hello", "world", 123));
+			$output .= printTestCase("insert", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::delete("test4", array("aaa"), array("boo"));
+			$output .= printTestCase("delete", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::delete("test4", array("aaa", "bbb"), array("hello", "tech"));
+			$output .= printTestCase("delete", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+			
+			$ret = DAL::delete("test4", array("aaa", "bbb"), array("hello", "world"));
+			$output .= printTestCase("delete", OKify($ret));
+			
+			$data = DAL::select("test4");
+			$output .= print_r($data, true);
+			$output .= "<br/>";
+
 			$output .= endTestCase();	
 		}
 		

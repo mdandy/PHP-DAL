@@ -361,7 +361,7 @@ class DAL
 		}
 		catch(PDOException $e) 
 		{
-			echo ("Error: " . $e->getMessage());
+			//echo ("Error: " . $e->getMessage());
 		}
 		return false;
 	}
@@ -401,7 +401,7 @@ class DAL
 		}
 		catch(PDOException $e) 
 		{
-			echo ("Error: " . $e->getMessage());
+			//echo ("Error: " . $e->getMessage());
 		}
 		return false;
 	}
@@ -453,7 +453,7 @@ class DAL
 		}
 		catch(PDOException $e) 
 		{
-			echo ("Error: " . $e->getMessage());
+			//echo ("Error: " . $e->getMessage());
 		}
 		return array();
 	}
@@ -489,14 +489,13 @@ class DAL
 					$sql .= " AND ";
 			}
 
-			echo ("$sql <br/>");
-
 			$query = self::$dbh->prepare($sql);
-			return $query->execute(array_merge($data, $where_args));
+			$isSuccessful = $query->execute(array_merge($data, $where_args));
+			return $isSuccessful;
 		}
 		catch(PDOException $e) 
 		{
-			echo ("Error: " . $e->getMessage());
+			//echo ("Error: " . $e->getMessage());
 		}
 		return false;
 	}
@@ -541,14 +540,41 @@ class DAL
 		}
 		catch(PDOException $e) 
 		{
-			echo ("Error: " . $e->getMessage());
+			//echo ("Error: " . $e->getMessage());
 		}
 		return false;
 	}
 	
-	public function delete()
+	/**
+	 * Delete an existing data from a table.
+	 * @param string $tableName The name of the table
+	 * @param string[] $where_columns The name of the columns to be used in the WHERE clause
+	 * @param string[] $where_args The arguments of the WHERE clause
+	 * @return true on success or false otherwise
+	 */
+	public function delete($tableName, $where_columns, $where_args)
 	{
-		
+		try
+		{
+			// Building the SQL statement
+			$sql = "DELETE FROM $tableName WHERE ";
+			for ($i = 0; $i < count($where_columns); $i++)
+			{
+				$sql .= $where_columns[$i];
+				$sql .= "=?";
+				if ($i != count($where_columns) - 1)
+					$sql .= " AND ";
+			}
+
+			$query = self::$dbh->prepare($sql);
+			$isSuccessful = $query->execute($where_args);
+			return $isSuccessful;
+		}
+		catch(PDOException $e) 
+		{
+			//echo ("Error: " . $e->getMessage());
+		}
+		return false;
 	}
 }
 
